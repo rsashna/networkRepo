@@ -76,8 +76,14 @@ write(sd, sbuf, BUFLEN);
 
 //TODO create file; while{file!=eof && strcmp(sbuf, "found")}, read() sd	  
 
-read(sd, sbuf, BUFLEN);
-fprintf(stdout, "\n-----FILE CONTENTS-----\n %s\n -----FILE END-----", sbuf); /*prints file content*/
+//read(sd, sbuf, BUFLEN);
+fprintf(stdout, "\n-----FILE CONTENTS Start-----\n"); /*prints file content*/
+
+while(read(sd, sbuf, 100)){ /*gets more than 100c until eof*/
+//read(sd, sbuf, BUFLEN);
+fprintf(stdout, "%s", sbuf);
+}
+fprintf(stdout, "\n---------FILE END--------\n\n"); /*prints file content*/
 
 	close(sd);
 	return(0);
