@@ -125,11 +125,22 @@ if (sFile == NULL)
  int si=0;
  char temp;
 //TODO this gets first 100c for now
-while(fscanf(sFile, "%c", &temp)!=EOF && si<100){
+while(fscanf(sFile, "%c", &temp)!=EOF){
+
+if(si<100){
 fbuf[si]=temp;
 si++;
+}else{
+write(sd, fbuf, 100);
+si=0;
+}
+
 }
 //fbuf[100]="\0";
+while(si<100){/*patch: missingno*/
+fbuf[si]=' ';
+si++;
+}
 write(sd, fbuf, 100);
  
  
