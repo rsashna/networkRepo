@@ -1,4 +1,4 @@
-/* A simple echo client using TCP */
+/* TCP FILE DOWNLOADER FROM SERVER */
 #include <stdio.h>
 #include <netdb.h>
 #include <sys/types.h>
@@ -78,8 +78,6 @@ write(sd, sbuf, BUFLEN);
 	  read(sd, sbuf, BUFLEN);
 	  fprintf(stdout, "File request %s\n", sbuf); /*prints found or error*/
 	  
-//TODO create new file with name
-
 cFile = fopen(fileToD, "w");
 
 if (cFile == NULL) {
@@ -88,17 +86,13 @@ if (cFile == NULL) {
   exit(1);
 }
 
-//TODO create file; while{file!=eof && strcmp(sbuf, "found")}, read() sd	  
-
-//read(sd, sbuf, BUFLEN);
-fprintf(stdout, "\n-----FILE CONTENTS Start-----\n"); /*prints file content*/
+fprintf(stdout, "\n-----FILE CONTENTS Start-----\n");
 
 while(read(sd, sbuf, strlen(sbuf))){ /*gets more than 100c until eof*/
-//read(sd, sbuf, BUFLEN);
 fprintf(stdout, "%s", sbuf);/*print to stdout*/
-fprintf(cFile, "%s", sbuf);/*print to stdout*/
+fprintf(cFile, "%s", sbuf);/*print to file*/
 }
-fprintf(stdout, "\n---------FILE END--------\n\n"); /*prints file content*/
+fprintf(stdout, "\n---------FILE END--------\n\n");
 	
 	fclose(cFile);
 	close(sd);
