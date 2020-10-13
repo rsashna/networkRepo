@@ -13,6 +13,8 @@
 
 #define SERVER_TCP_PORT 3000	/* well-known port */
 #define BUFLEN		256	/* buffer length */
+#define SCNLEN		100	/* scan length */
+
 
 int echod(int);
 void reaper(int);
@@ -20,6 +22,8 @@ void reaper(int);
 int main(int argc, char **argv)
 {
 	int 	sd, new_sd, client_len, port;
+	
+
 	struct	sockaddr_in server, client;
 
 	switch(argc){
@@ -80,8 +84,9 @@ int main(int argc, char **argv)
 /*	echod program	*/
 int echod(int sd)
 {
-	char	*bp, buf[BUFLEN];
+	char	*bp, buf[BUFLEN], fbuf[100];
 	int 	n, bytes_to_read;
+FILE *sFile;
 int fileFlag=0;
 //	write(sd, "Hello\n" , 6);
 	printf("TCP established\n");
@@ -106,9 +111,32 @@ write(sd, "error", 5);
 }else{
 printf("File found\n");
 write(sd, "found", BUFLEN); /*the BUFLEN will flush out the other stuff*/
+
+//TODO open file<, while(file!=eof){scan 100 bytes into sd}<
+
+sFile = fopen(fname, "r");
+/*checking if file openable is*/
+if (sFile == NULL)
+ {  
+ printf("Error! Could not open file\n");
+ exit(-1);
+ }
+ 
+ int si=0;
+ char temp;
+//TODO this gets first 100c for now
+while(fscanf(sFile, "%c", &temp)!=EOF && si<100){
+fbuf[si]=temp;
+si++;
+}
+//fbuf[100]="\0";
+write(sd, fbuf, 100);
+ 
+ 
+ 
 }
 	
-	
+fclose (sFile);	
 	close(sd);
 	return(0);
 }
