@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <strings.h>
+#include <string.h>
 
 
 
@@ -21,6 +22,8 @@ int main(int argc, char **argv)
 	struct	hostent		*hp;
 	struct	sockaddr_in server;
 	char	*host, *bp, rbuf[BUFLEN], sbuf[BUFLEN];
+
+FILE *cFile;
 
 	switch(argc){
 	case 2:
@@ -62,7 +65,10 @@ int main(int argc, char **argv)
 printf("Name the file to download: \n");
 	
 	while(n=read(0, sbuf, BUFLEN)){	/* get user message */ /*READ*/
-
+char fileToD[30];
+//fileToD=sbuf;
+memcpy(fileToD, sbuf, strlen(sbuf));
+fileToD[strlen(sbuf)-1]='\0';
 printf("Checking sever for: %s", sbuf);
 
 write(sd, sbuf, BUFLEN);
@@ -74,17 +80,27 @@ write(sd, sbuf, BUFLEN);
 	  
 //TODO create new file with name
 
+cFile = fopen(fileToD, "w");
+
+if (cFile == NULL) {
+  fprintf(stderr, "Can't open output file %s!\n",
+          fileToD);
+  exit(1);
+}
+
 //TODO create file; while{file!=eof && strcmp(sbuf, "found")}, read() sd	  
 
 //read(sd, sbuf, BUFLEN);
 fprintf(stdout, "\n-----FILE CONTENTS Start-----\n"); /*prints file content*/
 
-while(read(sd, sbuf, 100)){ /*gets more than 100c until eof*/
+while(read(sd, sbuf, strlen(sbuf))){ /*gets more than 100c until eof*/
 //read(sd, sbuf, BUFLEN);
-fprintf(stdout, "%s", sbuf);
+fprintf(stdout, "%s", sbuf);/*print to stdout*/
+fprintf(cFile, "%s", sbuf);/*print to stdout*/
 }
 fprintf(stdout, "\n---------FILE END--------\n\n"); /*prints file content*/
-
+	
+	fclose(cFile);
 	close(sd);
 	return(0);
 	}
