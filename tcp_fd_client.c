@@ -76,6 +76,9 @@ write(sd, sbuf, BUFLEN);
 
 //TODO create file; while{file!=eof && strcmp(sbuf, "found")}, read() sd	  
 
+read(sd, sbuf, BUFLEN);
+fprintf(stdout, "\n-----FILE CONTENTS-----\n %s\n -----FILE END-----", sbuf); /*prints file content*/
+
 	close(sd);
 	return(0);
 	}
