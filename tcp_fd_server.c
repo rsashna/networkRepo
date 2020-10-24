@@ -1,4 +1,4 @@
-/* A simple echo server using TCP */
+/* TCP FILE DOWNLOADER FROM SERVER */
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/unistd.h>
@@ -99,23 +99,21 @@ printf("File download requested for %s\n", buf);
 printf("File download requested for %s\n", fname);	
 
 
-//TODO check if file exists, change flag ; send() recv() same as param0 write() read()?
-
-if(access(fname, F_OK) == 0){ /*CURRENT ERROR; BUF NWAE*/
+if(access(fname, F_OK) == 0){ /*file exists is flag=1*/
 fileFlag=1;
 }
 
 if(fileFlag==0){
-printf("ERROR file not found\n");
+printf("ERROR file not found\n\n");
 write(sd, "error", 5);
+close(sd);
+return(0);
 }else{
 printf("File found\n");
 write(sd, "found", BUFLEN); /*the BUFLEN will flush out the other stuff*/
 
-//TODO open file<, while(file!=eof){scan 100 bytes into sd}<
-
 sFile = fopen(fname, "r");
-/*checking if file openable is*/
+/*checking if file opens*/
 if (sFile == NULL)
  {  
  printf("Error! Could not open file\n");
@@ -124,7 +122,7 @@ if (sFile == NULL)
  
  int si=0;
  char temp;
-//TODO this gets first 100c for now
+
 while(fscanf(sFile, "%c", &temp)!=EOF){
 
 if(si<100){
@@ -136,14 +134,12 @@ si=0;
 }
 
 }
-//fbuf[100]="\0";
+
 while(si<100){/*patch: missingno*/
 fbuf[si]=' ';
 si++;
 }
 write(sd, fbuf, 100);
- 
- 
  
 }
 	
