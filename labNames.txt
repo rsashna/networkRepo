@@ -1,0 +1,20 @@
+LIST OF ALL PROGRAMS AND THEIR NAMES
+
+
+
+ORG exe files --oges ogec (also in originalProgs folder)
+
+LAB 1&2 echo_client.c echo_server.c (also in originalProgs folder)
+
+Lab 3 tcp_hello.c --client side 
+Lab 3 tcp_hello_server.c --server side
+
+File Download Applications
+
+Lab 4 tcp_fd_clent.c --client side 
+Lab 4 tcp_fd_server.c --server side
+
+Lab 5 time_client.c time_server.c (also in originalProgs folder)
+Lab 5 udp_fd_clent.c --client side 
+Lab 4 udp_fd_server.c --server side
+
