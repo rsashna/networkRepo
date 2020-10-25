@@ -45,15 +45,14 @@ struct pdu rpdu;
         sin.sin_addr.s_addr = INADDR_ANY;
         sin.sin_port = htons(port);
                                                                                                  
-    /* Allocate a socket */
         s = socket(AF_INET, SOCK_DGRAM, 0); 				/*SOCKET*/
 printf("checkSocket\n");        
         if (s < 0)
 		fprintf(stderr, "can't create socket\n");
-                                                                                
-    /* Bind the socket */
+
         if (bind(s, (struct sockaddr *)&sin, sizeof(sin)) < 0) 	/*BIND*/
 		fprintf(stderr, "can't bind to %d port\n",port);
+while(1){
         listen(s, 5);							/*LISTEN*/
 
 printf("checkListen\n");
@@ -69,47 +68,42 @@ char	*bp, buf[BUFLEN], fbuf[101];
 int 	n, bytes_to_read;
 FILE *sFile;
 int fileFlag=0;
-	printf("CheckServer.\n");
+	printf("checkServer\n");
 	
 
 char fname[100];
-memcpy(fname, rpdu.data+1, strlen(rpdu.data)); /**/
-printf("File requested by client: %s\n", fname); 
+memcpy(fname, rpdu.data+1, strlen(rpdu.data)); 		/*take the data*/
 
-
-//for(int i=1 ; i<strlen(rpdu.data)-2 ; i++){
-//fname[i-1]=rpdu.data[i];
-//}
-
-printf("File download requested for %s\n", fname);	
 fname[strlen(rpdu.data)-1]='\0';
-	
+
 printf("File download requested for %s\n", fname);	
 
 
-if(access(fname, F_OK) == 0){ /*file exists is flag=1*/
+if(access(fname, F_OK) == 0){ 				/*file exists is flag=1*/
 fileFlag=1;
 }
 
 if(fileFlag==0){
-printf("ERROR: file not found\n\n");
+printf("ERROR: file not found\n\n");				/*file does not exist */
 rpdu.type='E';
-//write(sd, "error", 5);
+char *tempchar="this is garble";
+memcpy(rpdu.data, tempchar, 1);
 
-close(sd);
-return(0);
+	printf("CheckErrorMessage.\n");
+sendto(s, &rpdu, strlen(rpdu.data)+1, 0, (struct sockaddr *)&fsin, sizeof(fsin));
+	printf("CheckSendError\n");
 }else{
+
 printf("File found\n");
-write(sd, "found", BUFLEN); /*the BUFLEN will flush out the other stuff*/
 
 sFile = fopen(fname, "r");
-/*checking if file opens*/
-if (sFile == NULL)
+
+if (sFile == NULL)						/*checking if file opens*/
  {  
- printf("Error! Could not open file\n");
+ printf("ERROR: Could not open file\n");
  exit(-1);
  }
- 
+}
  int si=0;
  char temp;
 
@@ -119,34 +113,30 @@ if(si<100){
 fbuf[si]=temp;
 si++;
 }else{
-write(sd, fbuf, 100);
+
+rpdu.type='D';
+memcpy(rpdu.data, fbuf, strlen(fbuf)+1);
+sendto(s, &rpdu, strlen(rpdu.data)+1, 0, (struct sockaddr *)&fsin, sizeof(fsin));
+	printf("CheckSendD\n");
 si=0;
 }
-
 }
+
 
 while(si<100){/*patch: missingno*/
 fbuf[si]=' ';
 si++;
 }
-write(sd, fbuf, 100);
- 
+
+
+rpdu.type='F';
+memcpy(rpdu.data, fbuf, strlen(fbuf)+1);
+//rpdu.data[strlen(fbuf)-1]='\0';
+sendto(s, &rpdu, strlen(rpdu.data)+1, 0, (struct sockaddr *)&fsin, sizeof(fsin));
+	printf("CheckSendF\n");
 }
-	
-fclose (sFile);	
 	close(sd);
 	return(0);		
-		
-		
-//		(void) time(&now);
-//        	pts = ctime(&now);
-
-//		(void) sendto(s, pts, strlen(pts), 0,
-//			(struct sockaddr *)&fsin, sizeof(fsin));
-
-
-
-
 
 	}
 }
