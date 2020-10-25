@@ -74,7 +74,7 @@ FILE *cFile;
 
 
 while(1){	/* get user message */ /*READ*/
-
+printf("\n\n--------------------------------------------------------- \n");
 char fileToD[30];
 struct pdu spdu;
 
@@ -101,40 +101,49 @@ if(spdu.data[0]=='Q'){		//Let user quit application
 memcpy(fileToD, spdu.data, strlen(spdu.data));	/*create a file with same name*/
 
 //printf("SD: %d", s);
-write(s, &spdu, n+1);		//Send the PDU to the serv
+write(s, &spdu, n+1);					//Send the PDU to the server
 
 
 //fileToD=sbuf;
-//memcpy(fileToD, sbuf, strlen(sbuf));	/*create a file with same name*/
+//memcpy(fileToD, sbuf, strlen(sbuf));		/*create a file with same name*/
 //fileToD[strlen(sbuf)]='\0';
 printf("\n\nChecking sever for: %s", spdu.data);
 
-read(s, &spdu, (strlen(spdu.data)+1) );
-
+	
 cFile = fopen(fileToD, "w");				/*creating and writing to local file copy*/
 if (cFile == NULL) {
   fprintf(stderr, "Can't open output file %s!\n", fileToD);
   exit(1);
 }
-fprintf(stdout, "\n-----FILE CONTENTS Start-----\n");
 
-while(spdu.type != 'F'){
+fprintf(stdout, "\n-----FILE CONTENTS Start-----\n");
+int alen = sizeof(sin);
+//read(s, &spdu, (strlen(spdu.data)+1) );
+while(n=(recvfrom(s, &spdu, sizeof(spdu.data)+1, 0,(struct sockaddr *)&sin, &alen ) ) >0){
 
 	switch (spdu.type){
 
-	case 'E':
-		fprintf(stderr, "SERVER ERROR", fileToD);
-	  	exit(1);
-	break;
-
 	case 'D':
-	fprintf(stdout, "%s", spdu.data);				/*print to stdout*/
+	
 	fprintf(cFile, "%s", spdu.data);				/*print to file*/
+	fprintf(stdout, "%s", spdu.data);				/*print to stdout*/
+	
+	//fclose(cFile);
 	break;
 
 	case 'F':
-	fprintf(stdout, "%s", spdu.data);				/*print to stdout*/
+printf("checkF");
+	spdu.data[strlen(spdu.data)-2]='\0';
+	fprintf(stdout, "%s", spdu.data);			/*print to stdout*/
+	
 	fprintf(cFile, "%s", spdu.data);
+	fclose(cFile);
+	break;
+
+	case 'E':
+		fclose(cFile);
+		fprintf(stderr, "SERVER ERROR\n");
+	  	//exit(1);
 	break;
 
 	default:
@@ -143,14 +152,16 @@ while(spdu.type != 'F'){
 	break;
 	}
 
+if(spdu.type=='F' || spdu.type=='E')
+break;
 }
 
-while(spdu.type=='D' || spdu.type=='F'){		/*gets more than 100c until eof*/
+//while(spdu.type=='D' || spdu.type=='F'){		/*gets more than 100c until eof*/
 
-}
+//}
 fprintf(stdout, "\n---------FILE END--------\n\n");
 	
-	fclose(cFile);
+	
 	
 	}
 	close(s);
