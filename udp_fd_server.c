@@ -12,10 +12,8 @@
 #include <unistd.h>
 
 #define BUFLEN		256	/* buffer length */
-/*------------------------------------------------------------------------
- * main - Iterative UDP server for TIME service
- *------------------------------------------------------------------------
- */
+
+ /*------------------------------------------------------------------------*/
 int
 main(int argc, char *argv[])
 {
@@ -23,14 +21,14 @@ int 	sd, new_sd, client_len;
 	struct  sockaddr_in fsin;	/* the from address of a client	*/
 	char	buf[100];		/* "input" buffer; any size > 0	*/
 	char    *pts;
-	int	sock;			/* server socket		*/
+	int	sock;			/* server socket			*/
 	time_t	now;			/* current time			*/
-	int	alen;			/* from-address length		*/
-	struct  sockaddr_in sin; /* an Internet endpoint address         */
-        int     s, type;        /* socket descriptor and socket type    */
+	int	alen;			/* from-address length			*/
+	struct  sockaddr_in sin; 	/* an Internet endpoint address	*/
+        int     s, type;        	/* socket descriptor and socket type	*/
 	int 	port=3000;
-                                                                                
-
+struct  pdu{char type; char data[100];}; 	/* pdu 101 bytes with first byte is type  */
+struct pdu rpdu;
 	switch(argc){
 		case 1:
 			break;
@@ -49,34 +47,43 @@ int 	sd, new_sd, client_len;
                                                                                                  
     /* Allocate a socket */
         s = socket(AF_INET, SOCK_DGRAM, 0); 				/*SOCKET*/
+printf("checkSocket\n");        
         if (s < 0)
-		fprintf(stderr, "can't creat socket\n");
+		fprintf(stderr, "can't create socket\n");
                                                                                 
     /* Bind the socket */
         if (bind(s, (struct sockaddr *)&sin, sizeof(sin)) < 0) 	/*BIND*/
 		fprintf(stderr, "can't bind to %d port\n",port);
         listen(s, 5);							/*LISTEN*/
+
+printf("checkListen\n");
 	alen = sizeof(fsin);
 
 	while (1) {
-		
-		if (recvfrom(s, buf, sizeof(buf), 0,			/*RECVFROM ERROR*/
-				(struct sockaddr *)&fsin, &alen) < 0)
-			fprintf(stderr, "recvfrom error\n");
+									/*RECVFROM ERROR*/
+	if (recvfrom(s, rpdu.data, sizeof(rpdu.data), 0,(struct sockaddr *)&fsin, &alen) <  0)	
+	fprintf(stderr, "recvfrom error\n");
 		
 		
 char	*bp, buf[BUFLEN], fbuf[101];
-	int 	n, bytes_to_read;
+int 	n, bytes_to_read;
 FILE *sFile;
 int fileFlag=0;
-//	write(sd, "Hello\n" , 6);
-	printf("Server up.\n");
+	printf("CheckServer.\n");
 	
-read(sd, buf, BUFLEN);
+
 char fname[100];
-memcpy(fname, buf, strlen(buf)); /*apparently the \n is captured when entering the name on client side, thus the -1 for str termination*/
-fname[strlen(buf)-1]='\0';
-printf("File download requested for %s\n", buf);	
+memcpy(fname, rpdu.data+1, strlen(rpdu.data)); /**/
+printf("File requested by client: %s\n", fname); 
+
+
+//for(int i=1 ; i<strlen(rpdu.data)-2 ; i++){
+//fname[i-1]=rpdu.data[i];
+//}
+
+printf("File download requested for %s\n", fname);	
+fname[strlen(rpdu.data)-1]='\0';
+	
 printf("File download requested for %s\n", fname);	
 
 
@@ -85,8 +92,10 @@ fileFlag=1;
 }
 
 if(fileFlag==0){
-printf("ERROR file not found\n\n");
-write(sd, "error", 5);
+printf("ERROR: file not found\n\n");
+rpdu.type='E';
+//write(sd, "error", 5);
+
 close(sd);
 return(0);
 }else{
