@@ -87,9 +87,6 @@ printf("--------------------------------------------------------- \n\n");
 printf("Enter Q to quit download application, or \n");
 printf("Name the file to download: \n\n");
 
-//n=read(0, sbuf, BUFLEN);
-//n=read(0, sbuf, BUFLEN);
-
 
 
 spdu.type= 'C';		//Set the type to FILENAME PDU
@@ -97,50 +94,65 @@ n=read(0, spdu.data, 100); 	//Read the filename entered by the user
 spdu.data[n-1] = '\0';		//End file name str
 
 if(spdu.data[0]=='Q'){		//Let user quit application
-	//fclose(cFile);
-	//close(sd);
 	exit(1);
 }
 
 
 memcpy(fileToD, spdu.data, strlen(spdu.data));	/*create a file with same name*/
-write(sd, &spdu, n+1);		//Send the PDU to the serv
+
+//printf("SD: %d", s);
+write(s, &spdu, n+1);		//Send the PDU to the serv
 
 
 //fileToD=sbuf;
 //memcpy(fileToD, sbuf, strlen(sbuf));	/*create a file with same name*/
 //fileToD[strlen(sbuf)]='\0';
-printf("Checking sever for: %s", spdu.data);
+printf("\n\nChecking sever for: %s", spdu.data);
 
-//write(sd, sbuf, BUFLEN);
-	  
-////	  read(sd, sbuf, BUFLEN);
-////	  fprintf(stdout, "File request %s\n", sbuf); /*prints found or error*/
-	  
-cFile = fopen(fileToD, "w");
+read(s, &spdu, (strlen(spdu.data)+1) );
 
+cFile = fopen(fileToD, "w");				/*creating and writing to local file copy*/
 if (cFile == NULL) {
-  fprintf(stderr, "Can't open output file %s!\n",
-          fileToD);
+  fprintf(stderr, "Can't open output file %s!\n", fileToD);
   exit(1);
 }
-
 fprintf(stdout, "\n-----FILE CONTENTS Start-----\n");
-//read(sd, sbuf, strlen(sbuf));
-//while(sbuf[0]=='D' || sbuf[0]=='F'){ /*gets more than 100c until eof*/
-while(read(sd, sbuf, strlen(sbuf))){ /*gets more than 100c until eof*/
-fprintf(stdout, "%s", sbuf);/*print to stdout*/
-fprintf(cFile, "%s", sbuf);/*print to file*/
+
+while(spdu.type != 'F'){
+
+	switch (spdu.type){
+
+	case 'E':
+		fprintf(stderr, "SERVER ERROR", fileToD);
+	  	exit(1);
+	break;
+
+	case 'D':
+	fprintf(stdout, "%s", spdu.data);				/*print to stdout*/
+	fprintf(cFile, "%s", spdu.data);				/*print to file*/
+	break;
+
+	case 'F':
+	fprintf(stdout, "%s", spdu.data);				/*print to stdout*/
+	fprintf(cFile, "%s", spdu.data);
+	break;
+
+	default:
+		fprintf(stderr, "UNEXPECTED ERROR OCCURED");
+	  	exit(1);
+	break;
+	}
+
+}
+
+while(spdu.type=='D' || spdu.type=='F'){		/*gets more than 100c until eof*/
+
 }
 fprintf(stdout, "\n---------FILE END--------\n\n");
 	
 	fclose(cFile);
 	
 	}
-
-
-//}
-
-	close(sd);
+	close(s);
 	exit(0);
 }
